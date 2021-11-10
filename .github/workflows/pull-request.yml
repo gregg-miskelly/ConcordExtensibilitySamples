@@ -1,0 +1,58 @@
+name: Pull Request
+
+on:
+  pull_request:
+    branches: [ PR-Validation ]
+
+jobs:
+  windows_build:
+    strategy:
+      matrix:
+        configuration: [Debug, Release]
+
+    runs-on: windows-2022
+
+    steps:
+    - name: Checkout
+      uses: actions/checkout@v2
+      with:
+        fetch-depth: 0
+
+    - name: Setup MSBuild.exe
+      uses: microsoft/setup-msbuild@v1.0.2
+
+    - name: Setup NuGet.exe for use with actions
+      uses: NuGet/setup-nuget@v1.0.5
+
+    - name: Restore CppCustomVisualizer.sln
+      run: NuGet.exe restore ${{ github.workspace }}\CppCustomVisualizer\CppCustomVisualizer.sln
+
+    - name: Restore Cpp\HelloWorld.sln
+      run: NuGet.exe restore ${{ github.workspace }}\HelloWorld\Cpp\HelloWorld.sln
+
+    - name: Restore Cs\HelloWorld.sln
+      run: NuGet.exe restore ${{ github.workspace }}\HelloWorld\Cs\HelloWorld.sln
+
+    - name: Restore Iris.sln
+      run: NuGet.exe restore ${{ github.workspace }}\Iris\Iris.sln
+
+    - name: Build CppCustomVisualizer.sln
+      run: msbuild ${{ github.workspace }}\CppCustomVisualizer\CppCustomVisualizer.sln /p:Configuration=$env:Configuration
+      env:
+        Configuration: ${{ matrix.configuration }}
+
+    - name: Build Cpp\HelloWorld.sln
+      run: msbuild ${{ github.workspace }}\HelloWorld\Cpp\HelloWorld.sln /p:Configuration=$env:Configuration
+      env:
+        Configuration: ${{ matrix.configuration }}
+
+    - name: Build Cs\HelloWorld.sln
+      run: msbuild ${{ github.workspace }}\HelloWorld\Cs\HelloWorld.sln /p:Configuration=$env:Configuration
+      env:
+        Configuration: ${{ matrix.configuration }}
+
+    - name: Build Iris.sln
+      run: msbuild ${{ github.workspace }}\Iris\Iris.sln /p:Configuration=$env:Configuration
+      env:
+        Configuration: ${{ matrix.configuration }}
+
